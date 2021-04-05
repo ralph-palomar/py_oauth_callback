@@ -84,7 +84,7 @@ def generate_twitter_auth_header():
         # APPEND OTHER OAUTH ARGS
         for k, v in request.args.items():
             if k.startswith('oauth_'):
-                oauth_headers[k] = v
+                oauth_headers[k] = urllib.parse.quote(v, safe='')
 
         # SORT BY HEADER KEY NAME
         output_string_array = []
