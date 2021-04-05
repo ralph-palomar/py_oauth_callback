@@ -10,7 +10,7 @@ import json
 api = Flask(__name__)
 
 # REQUEST PATH
-base_path = '/oauth'
+base_path = '/oauth/callback'
 
 # SETUP ROTATING LOGGERS
 logger = logging.getLogger('waitress')
@@ -28,13 +28,13 @@ if __name__ == '__main__':
 
 
 # CORS CHECKPOINT
-@api.route(f'{base_path}/callback', methods=['OPTIONS'])
+@api.route(f'{base_path}/twitter', methods=['OPTIONS'])
 def pre_flight():
     return create_response({}), 200
 
 
-@api.route(f'{base_path}/callback', methods=['GET'])
-def process_event():
+@api.route(f'{base_path}/twitter', methods=['GET'])
+def process_twitter():
     try:
         payload = request.json
         log_payload("REQUEST BODY", payload)
