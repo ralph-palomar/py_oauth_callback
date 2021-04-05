@@ -84,21 +84,21 @@ def generate_twitter_auth_header():
         # SORT BY HEADER KEY NAME
         output_string_array = []
         for k, v in sorted(oauth_headers.items()):
-            output_string_array.append(f'{k}={v}')
+            output_string_array.append(f'{k}={urllib.parse.quote(v, safe="")}')
 
         # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
-        output_string = urllib.parse.quote('&'.join(output_string_array), safe='')
+        output_string = '&'.join(output_string_array)
         hmac_signature = base64.b64encode(hmac.new(bytes(signing_key,'utf-8'), bytes(output_string,'utf-8'), sha1).digest()).decode()
 
         # APPEND THE HMAC SHA1 SIGNATURE TO THE HEADERS
-        oauth_headers['oauth_signature'] = hmac_signature
+        oauth_headers['oauth_signature'] = urllib.parse.quote(hmac_signature, safe='')
 
         # SORT THE HEADERS BY KEY NAME AND GENERATE THE FINAL OUTPUT
         final_output = []
         for k, v in sorted(oauth_headers.items()):
             final_output.append(f'{k}={v}')
 
-        output = f"OAuth {urllib.parse.quote(', '.join(final_output), safe='')}"
+        output = f"OAuth {', '.join(final_output)}"
 
         return output
 
