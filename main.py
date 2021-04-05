@@ -97,9 +97,9 @@ def generate_twitter_auth_header():
         # SORT THE HEADERS BY KEY NAME AND GENERATE THE FINAL OUTPUT
         final_output = []
         for k, v in sorted(oauth_headers.items()):
-            final_output.append(f'"{k}"="{v}"')
+            final_output.append(f'{k}="{v}"')
 
-        output = f"OAuth {', '.join(final_output)}"
+        output = f"OAuth {','.join(final_output)}"
 
         return output
 
