@@ -2,10 +2,14 @@ from flask import Flask, request, jsonify
 from waitress import serve
 from paste.translogger import TransLogger
 from logging.handlers import RotatingFileHandler
+from hashlib import sha1
 import logging
 import os
 import json
 import time
+import urllib
+import hmac
+import base64
 
 # APP CONFIG
 api = Flask(__name__)
@@ -53,24 +57,51 @@ def process_twitter():
 
 @api.route(f'{base_path}/twitter/auth', methods=['GET'])
 def generate_twitter_auth_header():
-    consumer_key = request.args.get("consumerKey")
-    if consumer_key is None:
-        return "Required query parameter is missing: consumerKey", 400
-
-    oauth_headers = {
-        "oauth_consumer_key": "",
-        "oauth_nonce": "",
-        "oauth_signature": "",
-        "oauth_signature_method": "HMAC-SHA1",
-        "oauth_timestamp": int(time.time()),
-        "oauth_token": "",
-        "oauth_version": "1.0"
-    }
-    oauth_header_keys = oauth_headers.keys()
-    oauth_header_values = oauth_headers.values()
-
     try:
-        return oauth_headers
+        consumer_key = request.args.get("consumerKey")
+        access_token = request.args.get("accessToken")
+        signing_key = request.args.get("signingKey")
+
+        if consumer_key is None:
+            return "Required query parameter is missing: consumerKey", 400
+
+        if signing_key is None:
+            return "Required query parameter is missing: signingKey", 400
+
+        # INITIAL OAUTH HEADERS
+        oauth_headers = {
+            "oauth_consumer_key": consumer_key,
+            "oauth_nonce": os.urandom(16).hex(),
+            "oauth_signature_method": "HMAC-SHA1",
+            "oauth_timestamp": int(time.time()),
+            "oauth_version": "1.0"
+        }
+
+        # APPEND ACCESS_TOKEN IF PRESENT
+        if access_token is not None:
+            oauth_headers['oauth_token'] = access_token
+
+        # SORT BY HEADER KEY NAME
+        output_string_array = []
+        for k, v in sorted(oauth_headers.items()):
+            output_string_array.append(f'{k}={v}')
+
+        # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
+        output_string = urllib.parse.quote('&'.join(output_string_array), safe='')
+        hmac_signature = base64.b64encode(hmac.new(bytes(signing_key), bytes(output_string), sha1).digest()).decode()
+
+        # APPEND THE HMAC SHA1 SIGNATURE TO THE HEADERS
+        oauth_headers['oauth_signature'] = hmac_signature
+
+        # SORT THE HEADERS BY KEY NAME AND GENERATE THE FINAL OUTPUT
+        final_output = []
+        for k, v in sorted(oauth_headers.items()):
+            final_output.append(f'{k}={v}')
+
+        output = f"OAuth {urllib.parse.quote(', '.join(final_output), safe='')}"
+
+        return output
+
     except Exception as e:
         logger.exception(e)
 
