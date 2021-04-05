@@ -5,6 +5,7 @@ from logging.handlers import RotatingFileHandler
 import logging
 import os
 import json
+import time
 
 # APP CONFIG
 api = Flask(__name__)
@@ -29,6 +30,7 @@ if __name__ == '__main__':
 
 # CORS CHECKPOINT
 @api.route(f'{base_path}/twitter', methods=['OPTIONS'])
+@api.route(f'{base_path}/twitter/auth', methods=['OPTIONS'])
 def pre_flight():
     return create_response({}), 200
 
@@ -45,6 +47,30 @@ def process_twitter():
             "status": "success"
         }), 200
 
+    except Exception as e:
+        logger.exception(e)
+
+
+@api.route(f'{base_path}/twitter/auth', methods=['GET'])
+def generate_twitter_auth_header():
+    consumer_key = request.args.get("consumerKey")
+    if consumer_key is None:
+        return "Required query parameter is missing: consumerKey"
+
+    oauth_headers = {
+        "oauth_consumer_key": "",
+        "oauth_nonce": "",
+        "oauth_signature": "",
+        "oauth_signature_method": "HMAC-SHA1",
+        "oauth_timestamp": int(time.time()),
+        "oauth_token": "",
+        "oauth_version": "1.0"
+    }
+    oauth_header_keys = oauth_headers.keys()
+    oauth_header_values = oauth_headers.values()
+
+    try:
+        return oauth_headers
     except Exception as e:
         logger.exception(e)
 
