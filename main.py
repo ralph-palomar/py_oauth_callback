@@ -70,8 +70,8 @@ def generate_twitter_auth_header():
 
         # INITIAL OAUTH HEADERS
         oauth_headers = {
-            "oauth_consumer_key": consumer_key,
-            "oauth_nonce": os.urandom(16).hex(),
+            "oauth_consumer_key": urllib.parse.quote(consumer_key, safe=''),
+            "oauth_nonce": urllib.parse.quote(os.urandom(16).hex(), safe=''),
             "oauth_signature_method": "HMAC-SHA1",
             "oauth_timestamp": int(time.time()),
             "oauth_version": "1.0"
@@ -79,13 +79,12 @@ def generate_twitter_auth_header():
 
         # APPEND ACCESS_TOKEN IF PRESENT
         if access_token is not None:
-            oauth_headers['oauth_token'] = access_token
+            oauth_headers['oauth_token'] = urllib.parse.quote(access_token, safe='')
 
         # SORT BY HEADER KEY NAME
         output_string_array = []
         for k, v in sorted(oauth_headers.items()):
-            val = urllib.parse.quote(v, safe='')
-            output_string_array.append(f'{k}={val}')
+            output_string_array.append(f'{k}={v}')
 
         # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
         output_string = '&'.join(output_string_array)
