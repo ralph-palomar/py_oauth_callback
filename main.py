@@ -55,7 +55,7 @@ def process_twitter():
 def generate_twitter_auth_header():
     consumer_key = request.args.get("consumerKey")
     if consumer_key is None:
-        return 400, "Required query parameter is missing: consumerKey"
+        return "Required query parameter is missing: consumerKey", 400
 
     oauth_headers = {
         "oauth_consumer_key": "",
