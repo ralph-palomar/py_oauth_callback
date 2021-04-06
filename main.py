@@ -100,7 +100,7 @@ def generate_twitter_auth_header():
         log_payload("OUTPUT_STRING", output_string)
         signing_key = urllib.parse.quote(consumer_secret, safe='') + '&' + urllib.parse.quote(token_secret, safe='')
         # log_payload("SIGNING KEY", signing_key)
-        hmac_signature = base64.b64encode(hmac.new(bytes(signing_key, 'utf-8'), bytes(output_string, 'utf-8'), sha1).hexdigest()).decode()
+        hmac_signature = base64.b64encode(hmac.new(bytes(signing_key, 'utf-8'), bytes(output_string, 'utf-8'), sha1).digest()).decode()
 
         # APPEND THE HMAC SHA1 SIGNATURE TO THE HEADERS
         oauth_headers['oauth_signature'] = urllib.parse.quote(hmac_signature, safe='')
