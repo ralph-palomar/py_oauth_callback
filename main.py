@@ -74,6 +74,8 @@ def generate_twitter_auth_header():
             return "Required query parameter is missing: twitterAPI", 400
         if twitter_method is None:
             return "Required query parameter is missing: twitterMethod", 400
+        if access_token is None:
+            return "Required query parameter is missing: accessToken", 400
         if token_secret is None:
             return "Required query parameter is missing: tokenSecret", 400
 
@@ -83,6 +85,7 @@ def generate_twitter_auth_header():
             "oauth_nonce": re.sub(r'\W+', '', base64.b64encode(os.urandom(32)).decode()),
             "oauth_signature_method": "HMAC-SHA1",
             "oauth_timestamp": int(time.time()),
+            "oauth_token": urllib.parse.quote(access_token, safe='')
             "oauth_version": "1.0"
         }
 
