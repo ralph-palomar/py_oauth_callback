@@ -85,10 +85,6 @@ def generate_twitter_auth_header():
             "oauth_version": "1.0"
         }
 
-        # APPEND ACCESS_TOKEN IF PRESENT
-        if access_token is not None:
-            oauth_headers['oauth_token'] = urllib.parse.quote(access_token, safe='')
-
         # APPEND OTHER OAUTH ARGS
         for k, v in request.args.items():
             if k.startswith('oauth_'):
