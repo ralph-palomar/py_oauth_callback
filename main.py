@@ -57,13 +57,13 @@ def process_twitter():
         logger.exception(e)
 
 
-@api.route(f'{base_path}/twitter/request_token', methods=['GET'])
-def generate_twitter_request_token():
+@api.route(f'{base_path}/twitter/actions', methods=['GET', 'POST', 'PUT'])
+def invoke_twitter_api():
     try:
         consumer_key = request.args.get("consumerKey")
         consumer_secret = request.args.get("consumerSecret")
         twitter_api = request.args.get("twitterAPI")
-        twitter_method = request.args.get("twitterMethod")
+        twitter_method = request.method
         token_secret = request.args.get("tokenSecret")
 
         if consumer_key is None:
@@ -72,8 +72,6 @@ def generate_twitter_request_token():
             return "Required query parameter is missing: signingKey", 400
         if twitter_api is None:
             return "Required query parameter is missing: twitterAPI", 400
-        if twitter_method is None:
-            return "Required query parameter is missing: twitterMethod", 400
         if token_secret is None:
             return "Required query parameter is missing: tokenSecret", 400
 
@@ -113,7 +111,7 @@ def generate_twitter_request_token():
         auth_header = "OAuth " + ', '.join(final_output)
         log_payload("AUTH_HEADER", auth_header)
 
-        output = requests.post("https://api.twitter.com/oauth/request_token", headers={
+        output = requests(method=twitter_method, url=twitter_api, headers={
             "Authorization": auth_header
         })
 
