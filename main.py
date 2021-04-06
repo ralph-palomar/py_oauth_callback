@@ -85,7 +85,7 @@ def generate_twitter_auth_header():
             "oauth_nonce": re.sub(r'\W+', '', base64.b64encode(os.urandom(32)).decode()),
             "oauth_signature_method": "HMAC-SHA1",
             "oauth_timestamp": int(time.time()),
-            "oauth_token": urllib.parse.quote(access_token, safe='')
+            "oauth_token": urllib.parse.quote(access_token, safe=''),
             "oauth_version": "1.0"
         }
 
