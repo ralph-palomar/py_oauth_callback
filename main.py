@@ -96,7 +96,7 @@ def generate_twitter_auth_header():
             output_string_array.append(f'{k}%3D{v}')
 
         # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
-        output_string = twitter_method + '&' + urllib.parse.quote(twitter_api, safe='') + '&' + '&'.join(output_string_array)
+        output_string = twitter_method + '&' + urllib.parse.quote(twitter_api, safe='') + '&' + '%26'.join(output_string_array)
         log_payload("OUTPUT_SIGNATURE_STRING", output_string)
         signing_key = urllib.parse.quote(consumer_secret, safe='') + '&' + urllib.parse.quote(token_secret, safe='')
         hmac_signature = base64.b64encode(hmac.new(bytes(signing_key, 'utf-8'), bytes(output_string, 'utf-8'), sha1).digest()).decode()
