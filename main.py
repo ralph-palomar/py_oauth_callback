@@ -97,7 +97,7 @@ def generate_twitter_auth_header():
         # SORT BY HEADER KEY NAME
         output_string_array = []
         for k, v in sorted(oauth_headers.items()):
-            output_string_array.append(f'{k}={v}')
+            output_string_array.append(f'{k}%3D{v}')
 
         # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
         output_string = twitter_method + '&' + urllib.parse.quote(twitter_api, safe='') + '&' + '&'.join(output_string_array)
