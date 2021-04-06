@@ -35,7 +35,7 @@ if __name__ == '__main__':
 
 # CORS CHECKPOINT
 @api.route(f'{base_path}/twitter', methods=['OPTIONS'])
-@api.route(f'{base_path}/twitter/auth', methods=['OPTIONS'])
+@api.route(f'{base_path}/twitter/request_token', methods=['OPTIONS'])
 def pre_flight():
     return create_response({}), 200
 
@@ -56,7 +56,7 @@ def process_twitter():
         logger.exception(e)
 
 
-@api.route(f'{base_path}/twitter/auth', methods=['GET'])
+@api.route(f'{base_path}/twitter/request_token', methods=['GET'])
 def generate_twitter_auth_header():
     try:
         consumer_key = request.args.get("consumerKey")
