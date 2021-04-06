@@ -60,18 +60,21 @@ def generate_twitter_auth_header():
     try:
         consumer_key = request.args.get("consumerKey")
         access_token = request.args.get("accessToken")
-        signing_key = request.args.get("signingKey")
+        consumer_secret = request.args.get("consumerSecret")
         twitter_api = request.args.get("twitterAPI")
         twitter_method = request.args.get("twitterMethod")
+        token_secret = request.args.get("tokenSecret")
 
         if consumer_key is None:
             return "Required query parameter is missing: consumerKey", 400
-        if signing_key is None:
+        if consumer_secret is None:
             return "Required query parameter is missing: signingKey", 400
         if twitter_api is None:
             return "Required query parameter is missing: twitterAPI", 400
         if twitter_method is None:
             return "Required query parameter is missing: twitterMethod", 400
+        if token_secret is None:
+            return "Required query parameter is missing: tokenSecret", 400
 
         # INITIAL OAUTH HEADERS
         oauth_headers = {
@@ -99,7 +102,8 @@ def generate_twitter_auth_header():
         # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
         output_string = twitter_method + '&' + urllib.parse.quote(twitter_api, safe='') + '&' + '&'.join(output_string_array)
         log_payload("OUTPUT_STRING", output_string)
-        hmac_signature = base64.b64encode(hmac.new(bytes(signing_key,'utf-8'), bytes(output_string,'utf-8'), sha1).digest()).decode()
+        signing_key = urllib.parse.quote(consumer_secret, safe='') + '&' + urllib.parse.quote(token_secret, safe='')
+        hmac_signature = base64.b64encode(hmac.new(bytes(signing_key, 'utf-8'), bytes(output_string, 'utf-8'), sha1).digest()).decode()
 
         # APPEND THE HMAC SHA1 SIGNATURE TO THE HEADERS
         oauth_headers['oauth_signature'] = urllib.parse.quote(hmac_signature, safe='')
