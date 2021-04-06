@@ -10,6 +10,7 @@ import time
 import urllib
 import hmac
 import base64
+import re
 
 # APP CONFIG
 api = Flask(__name__)
@@ -79,7 +80,7 @@ def generate_twitter_auth_header():
         # INITIAL OAUTH HEADERS
         oauth_headers = {
             "oauth_consumer_key": urllib.parse.quote(consumer_key, safe=''),
-            "oauth_nonce": urllib.parse.quote(os.urandom(16).hex(), safe=''),
+            "oauth_nonce": re.sub(r'\W+', '', base64.b64encode(os.urandom(32)).decode()),
             "oauth_signature_method": "HMAC-SHA1",
             "oauth_timestamp": int(time.time()),
             "oauth_version": "1.0"
