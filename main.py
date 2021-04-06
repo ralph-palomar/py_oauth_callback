@@ -111,6 +111,7 @@ def generate_twitter_request_token():
             final_output.append(f'{k}="{v}"')
 
         auth_header = "OAuth " + ', '.join(final_output)
+        log_payload("AUTH_HEADER", auth_header)
 
         output = requests.post("https://api.twitter.com/oauth/request_token", headers={
             "Authorization": auth_header
