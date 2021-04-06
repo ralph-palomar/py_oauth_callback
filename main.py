@@ -60,7 +60,6 @@ def process_twitter():
 def generate_twitter_auth_header():
     try:
         consumer_key = request.args.get("consumerKey")
-        access_token = request.args.get("accessToken")
         consumer_secret = request.args.get("consumerSecret")
         twitter_api = request.args.get("twitterAPI")
         twitter_method = request.args.get("twitterMethod")
@@ -74,8 +73,6 @@ def generate_twitter_auth_header():
             return "Required query parameter is missing: twitterAPI", 400
         if twitter_method is None:
             return "Required query parameter is missing: twitterMethod", 400
-        if access_token is None:
-            return "Required query parameter is missing: accessToken", 400
         if token_secret is None:
             return "Required query parameter is missing: tokenSecret", 400
 
@@ -85,19 +82,17 @@ def generate_twitter_auth_header():
             "oauth_nonce": re.sub(r'\W+', '', base64.b64encode(os.urandom(32)).decode()),
             "oauth_signature_method": "HMAC-SHA1",
             "oauth_timestamp": int(time.time()),
-            "oauth_token": urllib.parse.quote(access_token, safe=''),
             "oauth_version": "1.0"
         }
 
         # APPEND OTHER OAUTH ARGS
-        oauth_signature_data = oauth_headers.copy()
         for k, v in request.args.items():
             if k.startswith('oauth_'):
-                oauth_signature_data[k] = urllib.parse.quote(v, safe='')
+                oauth_headers[k] = urllib.parse.quote(v, safe='')
 
         # SORT BY HEADER KEY NAME
         output_string_array = []
-        for k, v in sorted(oauth_signature_data.items()):
+        for k, v in sorted(oauth_headers.items()):
             output_string_array.append(f'{k}%3D{v}')
 
         # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
