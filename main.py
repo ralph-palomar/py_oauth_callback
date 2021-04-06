@@ -11,6 +11,7 @@ import urllib
 import hmac
 import base64
 import re
+import requests
 
 # APP CONFIG
 api = Flask(__name__)
@@ -57,7 +58,7 @@ def process_twitter():
 
 
 @api.route(f'{base_path}/twitter/request_token', methods=['GET'])
-def generate_twitter_auth_header():
+def generate_twitter_request_token():
     try:
         consumer_key = request.args.get("consumerKey")
         consumer_secret = request.args.get("consumerSecret")
@@ -109,9 +110,13 @@ def generate_twitter_auth_header():
         for k, v in sorted(oauth_headers.items()):
             final_output.append(f'{k}="{v}"')
 
-        output = "OAuth " + ', '.join(final_output)
+        auth_header = "OAuth " + ', '.join(final_output)
 
-        return output
+        output = requests.post("https://api.twitter.com/oauth/request_token", headers={
+            "Authorization": auth_header
+        })
+
+        return output.json()
 
     except Exception as e:
         logger.exception(e)
