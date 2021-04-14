@@ -112,6 +112,7 @@ def invoke_twitter_api():
             "Authorization": auth_header
         })
 
+        logger.info(res.json())
         return res.json(), res.status_code
 
     except Exception as e:
