@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from waitress import serve
 from paste.translogger import TransLogger
 from logging.handlers import RotatingFileHandler
@@ -104,13 +104,14 @@ def invoke_twitter_api():
 
         form_data = split_form_data(res.text)
         oauth_token = form_data['oauth_token']
-        oauth_token_secret = form_data['oauth_token_secret']
         oauth_callback_confirmed = form_data['oauth_callback_confirmed']
 
         if oauth_callback_confirmed == 'true':
             redirect_url = f'https://api.twitter.com/oauth/authorize?oauth_token={oauth_token}'
 
-        return redirect_url, 302
+        response = make_response()
+        response.headers['Location'] = redirect_url
+        return response, 302
 
     except Exception as e:
         logger.exception(e)
