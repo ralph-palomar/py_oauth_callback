@@ -49,9 +49,7 @@ def process_twitter():
 
         # APPLICATION LOGIC HERE #
 
-        return create_response({
-            "status": "success"
-        }), 200
+        return "SUCCESS", 200
 
     except Exception as e:
         logger.exception(e)
