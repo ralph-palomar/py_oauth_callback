@@ -93,7 +93,7 @@ def invoke_twitter_api():
 
         # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
         signature_base_str = 'POST' + '&' + percent_encode('https://api.twitter.com/oauth/request_token') + '&' + percent_encode('&'.join(param_string_arr))
-        signing_key = percent_encode(consumer_secret) + '&' + percent_encode(token_secret)
+        signing_key = percent_encode(consumer_secret) + '&'
         hmac_signature = base64.b64encode(hmac.new(bytes(signing_key, 'utf-8'), bytes(signature_base_str, 'utf-8'), sha1).digest()).decode()
 
         log_payload("OAUTH_SIGNATURE", {
