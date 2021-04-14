@@ -36,7 +36,7 @@ if __name__ == '__main__':
 
 # CORS CHECKPOINT
 @api.route(f'{base_path}/twitter', methods=['OPTIONS'])
-@api.route(f'{base_path}/twitter/request_token', methods=['OPTIONS'])
+@api.route(f'{base_path}/twitter/authorize', methods=['OPTIONS'])
 def pre_flight():
     return create_response({}), 200
 
@@ -57,7 +57,7 @@ def process_twitter():
         logger.exception(e)
 
 
-@api.route(f'{base_path}/twitter/request_token', methods=['POST'])
+@api.route(f'{base_path}/twitter/authorize', methods=['GET'])
 def invoke_twitter_api():
     try:
         consumer_key = os.environ['TWITTER_CONSUMER_KEY']
@@ -98,9 +98,11 @@ def invoke_twitter_api():
         auth_header = f'OAuth oauth_nonce="{oauth_headers["oauth_nonce"]}", oauth_callback="{percent_encode(oauth_headers["oauth_callback"])}", oauth_signature_method="{oauth_headers["oauth_signature_method"]}", oauth_timestamp="{oauth_headers["oauth_timestamp"]}", oauth_consumer_key="{oauth_headers["oauth_consumer_key"]}", oauth_signature="{oauth_headers["oauth_signature"]}", oauth_version="{oauth_headers["oauth_version"]}"'
         logger.info(auth_header)
 
-        requests.request('POST', 'https://api.twitter.com/oauth/request_token', headers={
+        res = requests.request('POST', 'https://api.twitter.com/oauth/request_token', headers={
             "Authorization": auth_header
         })
+
+        logger.info(res.raw)
 
         return "OK", 200
 
