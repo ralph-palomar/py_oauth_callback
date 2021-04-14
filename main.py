@@ -51,7 +51,8 @@ def process_twitter():
         consumer_key = os.environ['TWITTER_CONSUMER_KEY']
         access_token_url = f'https://api.twitter.com/oauth/access_token?oauth_consumer_key={consumer_key}&{request.query_string.decode()}'
         res = requests.request('POST', access_token_url)
-        logger.info(res.text)
+        form_data = split_form_data(res.text)
+        log_payload("USER_TOKEN", form_data)
 
         return "SUCCESS", 200
 
