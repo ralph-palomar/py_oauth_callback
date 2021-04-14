@@ -12,6 +12,7 @@ import hmac
 import base64
 import re
 import requests
+import config
 
 # APP CONFIG
 api = Flask(__name__)
@@ -63,32 +64,10 @@ def invoke_twitter_api():
         callback_url = os.environ['TWITTER_CALLBACK_URL']
 
         # INITIAL OAUTH HEADERS
-        oauth_headers = {
-            "oauth_callback": callback_url,
-            "oauth_consumer_key": consumer_key,
-            "oauth_nonce": re.sub(r'\W+', '', base64.b64encode(os.urandom(32)).decode()),
-            "oauth_signature_method": "HMAC-SHA1",
-            "oauth_timestamp": int(time.time()),
-            "oauth_version": "1.0"
-        }
+        oauth_headers = get_minimum_oauth_headers(consumer_key)
+        oauth_headers['oauth_callback'] = callback_url
 
-        # SORT BY HEADER KEY NAME
-        param_string_arr = []
-        for k, v in sorted(oauth_headers.items()):
-            param_key = f'{k}'
-            param_val = f'{v}'
-            param_string_arr.append(f'{percent_encode(param_key)}={percent_encode(param_val)}')
-
-        # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
-        signature_base_str = 'POST' + '&' + percent_encode('https://api.twitter.com/oauth/request_token') + '&' + percent_encode('&'.join(param_string_arr))
-        signing_key = percent_encode(consumer_secret) + '&'
-        hmac_signature = base64.b64encode(hmac.new(bytes(signing_key, 'utf-8'), bytes(signature_base_str, 'utf-8'), sha1).digest()).decode()
-
-        log_payload("OAUTH_SIGNATURE", {
-            "signatureBaseString": signature_base_str,
-            "signingKey": signing_key,
-            "hmac": hmac_signature
-        })
+        hmac_signature = create_signature('POST', 'https://api.twitter.com/oauth/request_token', oauth_headers, consumer_secret)
 
         # APPEND THE HMAC SHA1 SIGNATURE TO THE HEADERS
         oauth_headers['oauth_signature'] = percent_encode(hmac_signature)
@@ -143,3 +122,38 @@ def split_form_data(input_str):
         output_dict[attribute[0]] = attribute[1]
 
     return output_dict
+
+
+def get_minimum_oauth_headers(consumer_key):
+    oauth_headers = {
+        "oauth_consumer_key": consumer_key,
+        "oauth_nonce": re.sub(r'\W+', '', base64.b64encode(os.urandom(32)).decode()),
+        "oauth_signature_method": "HMAC-SHA1",
+        "oauth_timestamp": int(time.time()),
+        "oauth_version": "1.0"
+    }
+
+    return oauth_headers
+
+
+def create_signature(method, url, params=[], consumer_secret="", token_secret=""):
+    # SORT BY HEADER KEY NAME
+    param_string_arr = []
+    for k, v in sorted(params.items()):
+        param_key = f'{k}'
+        param_val = f'{v}'
+        param_string_arr.append(f'{percent_encode(param_key)}={percent_encode(param_val)}')
+
+    # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
+    signature_base_str = method + '&' + percent_encode(url) + '&' + percent_encode('&'.join(param_string_arr))
+    signing_key = percent_encode(consumer_secret) + '&' + token_secret
+    hmac_signature = base64.b64encode(
+        hmac.new(bytes(signing_key, 'utf-8'), bytes(signature_base_str, 'utf-8'), sha1).digest()).decode()
+
+    log_payload("OAUTH_SIGNATURE", {
+        "signatureBaseString": signature_base_str,
+        "signingKey": signing_key,
+        "hmac": hmac_signature
+    })
+
+    return hmac_signature
