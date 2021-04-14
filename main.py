@@ -41,7 +41,7 @@ def pre_flight():
     return create_response({}), 200
 
 
-@api.route(f'{base_path}/twitter', methods=['POST'])
+@api.route(f'{base_path}/twitter', methods=['GET,POST'])
 def process_twitter():
     try:
         payload = request.json
