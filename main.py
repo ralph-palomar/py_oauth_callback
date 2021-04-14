@@ -51,8 +51,9 @@ def process_twitter():
         consumer_key = os.environ['TWITTER_CONSUMER_KEY']
         access_token_url = f'https://api.twitter.com/oauth/access_token?oauth_consumer_key={consumer_key}&{request.query_string.decode()}'
         res = requests.request('POST', access_token_url)
-        form_data = split_form_data(res.text)
-        log_payload("USER_TOKEN", form_data)
+        access_token_data = split_form_data(res.text)
+        mongo_db = config.mongo_db('app', os.environ['MONGO_DB_PWD'], 'twitter')
+        mongo_db['tokens'].replace_one({"user_id": access_token_data['user_id']}, access_token_data, upsert=True)
 
         return "SUCCESS", 200
 
