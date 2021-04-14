@@ -81,7 +81,6 @@ def invoke_twitter_api():
             "oauth_nonce": re.sub(r'\W+', '', base64.b64encode(os.urandom(32)).decode()),
             "oauth_signature_method": "HMAC-SHA1",
             "oauth_timestamp": int(time.time()),
-            "oauth_token": access_token,
             "oauth_version": "1.0"
         }
 
@@ -106,7 +105,7 @@ def invoke_twitter_api():
         # APPEND THE HMAC SHA1 SIGNATURE TO THE HEADERS
         oauth_headers['oauth_signature'] = percent_encode(hmac_signature)
 
-        auth_header = f'OAuth oauth_nonce="{oauth_headers["oauth_nonce"]}", oauth_callback="{oauth_headers["oauth_callback"]}", oauth_signature_method="{oauth_headers["oauth_signature_method"]}", oauth_timestamp="{oauth_headers["oauth_timestamp"]}", oauth_consumer_key="{oauth_headers["oauth_consumer_key"]}", oauth_signature="{oauth_headers["oauth_signature"]}", oauth_version="{oauth_headers["oauth_version"]}"'
+        auth_header = f'OAuth oauth_nonce="{oauth_headers["oauth_nonce"]}", oauth_callback="{percent_encode(oauth_headers["oauth_callback"])}", oauth_signature_method="{oauth_headers["oauth_signature_method"]}", oauth_timestamp="{oauth_headers["oauth_timestamp"]}", oauth_consumer_key="{oauth_headers["oauth_consumer_key"]}", oauth_signature="{oauth_headers["oauth_signature"]}", oauth_version="{oauth_headers["oauth_version"]}"'
         logger.info(auth_header)
 
         output = requests.request('POST', 'https://api.twitter.com/oauth/request_token', headers={
