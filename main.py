@@ -115,9 +115,7 @@ def invoke_twitter_api():
 
         auth_header = "OAuth " + ', '.join(final_output)
 
-        log_payload("AUTHORIZATION", {
-            "authorization": auth_header
-        })
+        log_payload("AUTHORIZATION", auth_header)
 
         output = requests.request(twitter_method, twitter_api, headers={
             "authorization": auth_header
