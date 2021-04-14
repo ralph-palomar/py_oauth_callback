@@ -72,7 +72,7 @@ def invoke_twitter_api():
         # APPEND THE HMAC SHA1 SIGNATURE TO THE HEADERS
         oauth_headers['oauth_signature'] = percent_encode(hmac_signature)
 
-        auth_header = f'oauth_callback="{percent_encode(oauth_headers["oauth_callback"])}", {create_auth_header(oauth_headers)}'
+        auth_header = f'{create_auth_header(oauth_headers)}, oauth_callback="{percent_encode(oauth_headers["oauth_callback"])}"'
         logger.info(auth_header)
 
         res = requests.request('POST', 'https://api.twitter.com/oauth/request_token', headers={
