@@ -110,7 +110,7 @@ def invoke_twitter_api():
         auth_header = "OAuth " + ', '.join(final_output)
 
         log_payload("OAUTH_HEADERS", oauth_headers)
-        log_payload("AUTH_HEADER", {
+        log_payload("AUTHORIZATION", {
             "signature": output_string,
             "authorization": auth_header
         })
