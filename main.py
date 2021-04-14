@@ -110,8 +110,6 @@ def invoke_twitter_api():
 
         output = requests.request('POST', 'https://api.twitter.com/oauth/request_token', headers={
             "Authorization": auth_header
-        }, params={
-            "oauth_callback": "https://www.tes8.link/oauth/callback/twitter"
         })
 
         return output.json()
