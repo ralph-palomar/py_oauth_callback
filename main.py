@@ -106,9 +106,11 @@ def invoke_twitter_api():
         oauth_token = form_data['oauth_token']
         oauth_token_secret = form_data['oauth_token_secret']
         oauth_callback_confirmed = form_data['oauth_callback_confirmed']
-        logger.info(oauth_token)
 
-        return "OK", 200
+        if oauth_callback_confirmed == 'true':
+            redirect_url = f'https://api.twitter.com/oauth/authorize?oauth_token={oauth_token}'
+
+        return redirect_url, 302
 
     except Exception as e:
         logger.exception(e)
