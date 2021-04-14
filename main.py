@@ -113,11 +113,12 @@ def invoke_twitter_api():
         for k, v in sorted(oauth_headers.items()):
             final_output.append(f'{k}="{v}"')
 
-        auth_header = "OAuth " + ', '.join(final_output)
+        #auth_header = "OAuth " + ', '.join(final_output)
+        auth_header = f'OAuth oauth_nonce="{oauth_headers["oauth_nonce"]}", oauth_callback="{oauth_headers["oauth_callback"]}", oauth_signature_method="{oauth_headers["oauth_signature_method"]}", oauth_timestamp="{oauth_headers["oauth_timestamp"]}", oauth_consumer_key="{oauth_headers["oauth_consumer_key"]}, oauth_signature="{oauth_headers["oauth_signature"]}", oauth_version="{oauth_headers["oauth_version"]}"'
         logger.info(auth_header)
 
         output = requests.request(twitter_method, twitter_api, headers={
-            "authorization": auth_header
+            "Authorization":
         })
 
         return output.json()
