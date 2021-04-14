@@ -76,31 +76,27 @@ def invoke_twitter_api():
 
         # INITIAL OAUTH HEADERS
         oauth_headers = {
-            "oauth_consumer_key": percent_encode(consumer_key),
-            "oauth_nonce": percent_encode(re.sub(r'\W+', '', base64.b64encode(os.urandom(32)).decode())),
+            "oauth_callback": "https://www.tes8.link/oauth/callback/twitter",
+            "oauth_consumer_key": consumer_key,
+            "oauth_nonce": re.sub(r'\W+', '', base64.b64encode(os.urandom(32)).decode()),
             "oauth_signature_method": "HMAC-SHA1",
             "oauth_timestamp": int(time.time()),
-            "oauth_token": percent_encode(access_token),
+            "oauth_token": access_token,
             "oauth_version": "1.0"
         }
 
-        # APPEND OTHER OAUTH ARGS
-        for k, v in request.args.items():
-            if k.startswith('oauth_'):
-                oauth_headers[k] = percent_encode(v)
-
         # SORT BY HEADER KEY NAME
-        output_string_array = []
+        param_string_arr = []
         for k, v in sorted(oauth_headers.items()):
-            output_string_array.append(f'{k}={v}')
+            param_string_arr.append(f'{percent_encode(k)}={percent_encode(v)}')
 
         # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
-        output_string = 'POST' + '&' + percent_encode('https://api.twitter.com/oauth/request_token') + '&' + percent_encode('&'.join(output_string_array))
+        signature_base_str = 'POST' + '&' + percent_encode('https://api.twitter.com/oauth/request_token') + '&' + percent_encode('&'.join(param_string_arr))
         signing_key = percent_encode(consumer_secret) + '&' + percent_encode(token_secret)
-        hmac_signature = base64.b64encode(hmac.new(bytes(signing_key, 'utf-8'), bytes(output_string, 'utf-8'), sha1).digest()).decode()
+        hmac_signature = base64.b64encode(hmac.new(bytes(signing_key, 'utf-8'), bytes(signature_base_str, 'utf-8'), sha1).digest()).decode()
 
         log_payload("OAUTH_SIGNATURE", {
-            "signatureBaseString": output_string,
+            "signatureBaseString": signature_base_str,
             "signingKey": signing_key,
             "hmac": hmac_signature
         })
