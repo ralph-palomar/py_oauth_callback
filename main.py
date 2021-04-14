@@ -106,7 +106,7 @@ def invoke_twitter_api():
         })
 
         # APPEND THE HMAC SHA1 SIGNATURE TO THE HEADERS
-        oauth_headers['oauth_signature'] = urllib.parse.quote(hmac_signature, safe='')
+        oauth_headers['oauth_signature'] = percent_encode(hmac_signature)
 
         # SORT THE HEADERS BY KEY NAME AND GENERATE THE FINAL OUTPUT
         final_output = []
@@ -115,8 +115,12 @@ def invoke_twitter_api():
 
         auth_header = "OAuth " + ', '.join(final_output)
 
+        log_payload("AUTHORIZATION", {
+            "authorization": auth_header
+        })
+
         output = requests.request(twitter_method, twitter_api, headers={
-            "Authorization": auth_header
+            "authorization": auth_header
         })
 
         return output.json()
