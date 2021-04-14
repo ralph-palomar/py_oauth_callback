@@ -72,7 +72,7 @@ def invoke_twitter_api():
         # APPEND THE HMAC SHA1 SIGNATURE TO THE HEADERS
         oauth_headers['oauth_signature'] = percent_encode(hmac_signature)
 
-        auth_header = f'OAuth oauth_nonce="{oauth_headers["oauth_nonce"]}", oauth_callback="{percent_encode(oauth_headers["oauth_callback"])}", oauth_signature_method="{oauth_headers["oauth_signature_method"]}", oauth_timestamp="{oauth_headers["oauth_timestamp"]}", oauth_consumer_key="{oauth_headers["oauth_consumer_key"]}", oauth_signature="{oauth_headers["oauth_signature"]}", oauth_version="{oauth_headers["oauth_version"]}"'
+        auth_header = f'oauth_callback="{percent_encode(oauth_headers["oauth_callback"])}", {create_auth_header(oauth_headers)}'
         logger.info(auth_header)
 
         res = requests.request('POST', 'https://api.twitter.com/oauth/request_token', headers={
@@ -157,3 +157,7 @@ def create_signature(method, url, params=[], consumer_secret="", token_secret=""
     })
 
     return hmac_signature
+
+
+def create_auth_header(oauth_headers):
+    return f'OAuth oauth_nonce="{oauth_headers["oauth_nonce"]}", oauth_signature_method="{oauth_headers["oauth_signature_method"]}", oauth_timestamp="{oauth_headers["oauth_timestamp"]}", oauth_consumer_key="{oauth_headers["oauth_consumer_key"]}", oauth_signature="{oauth_headers["oauth_signature"]}", oauth_version="{oauth_headers["oauth_version"]}"'
