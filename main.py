@@ -88,7 +88,9 @@ def invoke_twitter_api():
         # SORT BY HEADER KEY NAME
         param_string_arr = []
         for k, v in sorted(oauth_headers.items()):
-            param_string_arr.append(f'{percent_encode(k)}={percent_encode(v)}')
+            param_key = f'{k}'
+            param_val = f'{v}'
+            param_string_arr.append(f'{percent_encode(param_key)}={percent_encode(param_val)}')
 
         # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
         signature_base_str = 'POST' + '&' + percent_encode('https://api.twitter.com/oauth/request_token') + '&' + percent_encode('&'.join(param_string_arr))
