@@ -113,7 +113,7 @@ def invoke_twitter_api():
         })
 
         logger.info(res.json())
-        return res.json(), res.status_code
+        return "OK", 200
 
     except Exception as e:
         logger.exception(e)
