@@ -96,7 +96,6 @@ def invoke_twitter_api():
 
         # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
         output_string = twitter_method + '&' + urllib.parse.quote(twitter_api, safe='') + '&' + '%26'.join(output_string_array)
-        log_payload("OUTPUT_SIGNATURE_STRING", output_string)
         signing_key = urllib.parse.quote(consumer_secret, safe='') + '&' + urllib.parse.quote(token_secret, safe='')
         hmac_signature = base64.b64encode(hmac.new(bytes(signing_key, 'utf-8'), bytes(output_string, 'utf-8'), sha1).digest()).decode()
 
@@ -109,7 +108,12 @@ def invoke_twitter_api():
             final_output.append(f'{k}="{v}"')
 
         auth_header = "OAuth " + ', '.join(final_output)
-        log_payload("AUTH_HEADER", auth_header)
+
+        log_payload("AUTH_HEADER", {
+            "signature": output_string,
+            "authorization": auth_header
+        })
+        log_payload("OAUTH_HEADERS", oauth_headers)
 
         output = requests.request(twitter_method, twitter_api, headers={
             "Authorization": auth_header
