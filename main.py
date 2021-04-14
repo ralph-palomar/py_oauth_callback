@@ -57,13 +57,14 @@ def process_twitter():
         logger.exception(e)
 
 
-@api.route(f'{base_path}/twitter/actions', methods=['GET', 'POST', 'PUT'])
+@api.route(f'{base_path}/twitter/request_token', methods=['POST'])
 def invoke_twitter_api():
     try:
         consumer_key = request.args.get("consumerKey")
         consumer_secret = request.args.get("consumerSecret")
         twitter_api = request.args.get("twitterAPI")
         twitter_method = request.method
+        access_token = request.args.get("accessToken")
         token_secret = request.args.get("tokenSecret")
 
         if consumer_key is None:
@@ -72,6 +73,8 @@ def invoke_twitter_api():
             return "Required query parameter is missing: signingKey", 400
         if twitter_api is None:
             return "Required query parameter is missing: twitterAPI", 400
+        if access_token is None:
+            return "Required query parameter is missing: accessToken", 400
         if token_secret is None:
             return "Required query parameter is missing: tokenSecret", 400
 
@@ -81,6 +84,7 @@ def invoke_twitter_api():
             "oauth_nonce": percent_encode(re.sub(r'\W+', '', base64.b64encode(os.urandom(32)).decode())),
             "oauth_signature_method": "HMAC-SHA1",
             "oauth_timestamp": int(time.time()),
+            "oauth_token": percent_encode(access_token),
             "oauth_version": "1.0"
         }
 
@@ -108,12 +112,6 @@ def invoke_twitter_api():
         # APPEND THE HMAC SHA1 SIGNATURE TO THE HEADERS
         oauth_headers['oauth_signature'] = percent_encode(hmac_signature)
 
-        # SORT THE HEADERS BY KEY NAME AND GENERATE THE FINAL OUTPUT
-        final_output = []
-        for k, v in sorted(oauth_headers.items()):
-            final_output.append(f'{k}="{v}"')
-
-        # auth_header = "OAuth " + ', '.join(final_output)
         auth_header = f'OAuth oauth_nonce="{oauth_headers["oauth_nonce"]}", oauth_callback="{oauth_headers["oauth_callback"]}", oauth_signature_method="{oauth_headers["oauth_signature_method"]}", oauth_timestamp="{oauth_headers["oauth_timestamp"]}", oauth_consumer_key="{oauth_headers["oauth_consumer_key"]}", oauth_signature="{oauth_headers["oauth_signature"]}", oauth_version="{oauth_headers["oauth_version"]}"'
         logger.info(auth_header)
 
