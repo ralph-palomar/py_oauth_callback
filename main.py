@@ -62,8 +62,6 @@ def invoke_twitter_api():
     try:
         consumer_key = request.args.get("consumerKey")
         consumer_secret = request.args.get("consumerSecret")
-        twitter_api = request.args.get("twitterAPI")
-        twitter_method = request.method
         access_token = request.args.get("accessToken")
         token_secret = request.args.get("tokenSecret")
 
@@ -71,8 +69,6 @@ def invoke_twitter_api():
             return "Required query parameter is missing: consumerKey", 400
         if consumer_secret is None:
             return "Required query parameter is missing: signingKey", 400
-        if twitter_api is None:
-            return "Required query parameter is missing: twitterAPI", 400
         if access_token is None:
             return "Required query parameter is missing: accessToken", 400
         if token_secret is None:
@@ -99,7 +95,7 @@ def invoke_twitter_api():
             output_string_array.append(f'{k}={v}')
 
         # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
-        output_string = twitter_method + '&' + percent_encode(twitter_api) + '&' + percent_encode('&'.join(output_string_array))
+        output_string = 'POST' + '&' + percent_encode('https://api.twitter.com/oauth/request_token') + '&' + percent_encode('&'.join(output_string_array))
         signing_key = percent_encode(consumer_secret) + '&' + percent_encode(token_secret)
         hmac_signature = base64.b64encode(hmac.new(bytes(signing_key, 'utf-8'), bytes(output_string, 'utf-8'), sha1).digest()).decode()
 
@@ -115,7 +111,7 @@ def invoke_twitter_api():
         auth_header = f'OAuth oauth_nonce="{oauth_headers["oauth_nonce"]}", oauth_callback="{oauth_headers["oauth_callback"]}", oauth_signature_method="{oauth_headers["oauth_signature_method"]}", oauth_timestamp="{oauth_headers["oauth_timestamp"]}", oauth_consumer_key="{oauth_headers["oauth_consumer_key"]}", oauth_signature="{oauth_headers["oauth_signature"]}", oauth_version="{oauth_headers["oauth_version"]}"'
         logger.info(auth_header)
 
-        output = requests.request(twitter_method, twitter_api, headers={
+        output = requests.request('POST', 'https://api.twitter.com/oauth/request_token', headers={
             "Authorization": auth_header
         })
 
