@@ -41,7 +41,7 @@ def pre_flight():
     return create_response({}), 200
 
 
-@api.route(f'{base_path}/twitter', methods=['GET'])
+@api.route(f'{base_path}/twitter', methods=['POST'])
 def process_twitter():
     try:
         payload = request.json
@@ -60,23 +60,13 @@ def process_twitter():
 @api.route(f'{base_path}/twitter/request_token', methods=['POST'])
 def invoke_twitter_api():
     try:
-        consumer_key = request.args.get("consumerKey")
-        consumer_secret = request.args.get("consumerSecret")
-        access_token = request.args.get("accessToken")
-        token_secret = request.args.get("tokenSecret")
-
-        if consumer_key is None:
-            return "Required query parameter is missing: consumerKey", 400
-        if consumer_secret is None:
-            return "Required query parameter is missing: signingKey", 400
-        if access_token is None:
-            return "Required query parameter is missing: accessToken", 400
-        if token_secret is None:
-            return "Required query parameter is missing: tokenSecret", 400
+        consumer_key = os.environ['TWITTER_CONSUMER_KEY']
+        consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
+        callback_url = os.environ['TWITTER_CALLBACK_URL']
 
         # INITIAL OAUTH HEADERS
         oauth_headers = {
-            "oauth_callback": "https://www.tes8.link/oauth/callback/twitter",
+            "oauth_callback": callback_url,
             "oauth_consumer_key": consumer_key,
             "oauth_nonce": re.sub(r'\W+', '', base64.b64encode(os.urandom(32)).decode()),
             "oauth_signature_method": "HMAC-SHA1",
@@ -108,11 +98,11 @@ def invoke_twitter_api():
         auth_header = f'OAuth oauth_nonce="{oauth_headers["oauth_nonce"]}", oauth_callback="{percent_encode(oauth_headers["oauth_callback"])}", oauth_signature_method="{oauth_headers["oauth_signature_method"]}", oauth_timestamp="{oauth_headers["oauth_timestamp"]}", oauth_consumer_key="{oauth_headers["oauth_consumer_key"]}", oauth_signature="{oauth_headers["oauth_signature"]}", oauth_version="{oauth_headers["oauth_version"]}"'
         logger.info(auth_header)
 
-        output = requests.request('POST', 'https://api.twitter.com/oauth/request_token', headers={
+        requests.request('POST', 'https://api.twitter.com/oauth/request_token', headers={
             "Authorization": auth_header
         })
 
-        return output.text
+        return "OK", 200
 
     except Exception as e:
         logger.exception(e)
