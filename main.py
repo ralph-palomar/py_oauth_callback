@@ -102,7 +102,7 @@ def invoke_twitter_api():
             "Authorization": auth_header
         })
 
-        logger.info(res.raw)
+        logger.info(res.text)
 
         return "OK", 200
 
