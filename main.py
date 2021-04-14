@@ -102,7 +102,11 @@ def invoke_twitter_api():
             "Authorization": auth_header
         })
 
-        logger.info(res.text)
+        form_data = split_form_data(res.text)
+        oauth_token = form_data['oauth_token']
+        oauth_token_secret = form_data['oauth_token_secret']
+        oauth_callback_confirmed = form_data['oauth_callback_confirmed']
+        logger.info(oauth_token)
 
         return "OK", 200
 
@@ -129,3 +133,12 @@ def create_response(response_payload):
 
 def percent_encode(input_str):
     return urllib.parse.quote(input_str, safe='')
+
+
+def split_form_data(input_str):
+    output_dict = {}
+    for attributes in input_str.split('&'):
+        attribute = attributes.split('=')
+        output_dict[attribute[0]] = attribute[1]
+
+    return output_dict
