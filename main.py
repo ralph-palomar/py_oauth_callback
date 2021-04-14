@@ -108,11 +108,11 @@ def invoke_twitter_api():
         auth_header = f'OAuth oauth_nonce="{oauth_headers["oauth_nonce"]}", oauth_callback="{percent_encode(oauth_headers["oauth_callback"])}", oauth_signature_method="{oauth_headers["oauth_signature_method"]}", oauth_timestamp="{oauth_headers["oauth_timestamp"]}", oauth_consumer_key="{oauth_headers["oauth_consumer_key"]}", oauth_signature="{oauth_headers["oauth_signature"]}", oauth_version="{oauth_headers["oauth_version"]}"'
         logger.info(auth_header)
 
-        response = requests.request('POST', 'https://api.twitter.com/oauth/request_token', headers={
+        res = requests.request('POST', 'https://api.twitter.com/oauth/request_token', headers={
             "Authorization": auth_header
         })
 
-        return response.json(), response.status_code
+        return res.json(), res.status_code
 
     except Exception as e:
         logger.exception(e)
