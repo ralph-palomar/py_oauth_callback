@@ -49,6 +49,7 @@ def process_twitter():
         oauth_token = access_token_data['oauth_token']
         token_secret = access_token_data['oauth_token_secret']
         oauth_headers['oauth_token'] = oauth_token
+        oauth_headers['user_id'] = user_id
         hmac_signature = create_twitter_signature('GET', f'https://api.twitter.com/1.1/users/show.json?user_id={user_id}', parameters=oauth_headers, consumer_secret=consumer_secret, token_secret=token_secret)
         oauth_headers['oauth_signature'] = percent_encode(hmac_signature)
         auth_header = f'{create_twitter_auth_header(oauth_headers)}, oauth_token="{percent_encode(oauth_token)}"'
