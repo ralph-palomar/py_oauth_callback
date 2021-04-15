@@ -6,7 +6,6 @@ from rphelpers import create_response, create_twitter_auth_header, create_twitte
 import os
 import requests
 import config
-import json
 
 # APP CONFIG
 api = Flask(__name__)
@@ -63,7 +62,9 @@ def process_twitter():
         })
 
         try:
-            return json.dumps(user_details.json(), indent=3), user_details.status_code
+            response = make_response(user_details.json())
+            response.headers['Content-Type'] = 'application/json'
+            return response, user_details.status_code
 
         except ValueError as e:
             return user_details.text, user_details.status_code
