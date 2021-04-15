@@ -1,16 +1,9 @@
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, make_response
 from waitress import serve
 from paste.translogger import TransLogger
-from logging.handlers import RotatingFileHandler
-from hashlib import sha1
-import logging
+from config import logger
+from rphelpers import create_response, create_twitter_auth_header, create_twitter_signature, log_payload, split_form_data, get_min_twitter_oauth_headers, percent_encode
 import os
-import json
-import time
-import urllib
-import hmac
-import base64
-import re
 import requests
 import config
 
@@ -20,12 +13,6 @@ api = Flask(__name__)
 # REQUEST PATH
 base_path = '/oauth/callback'
 
-# SETUP ROTATING LOGGERS
-logger = logging.getLogger('waitress')
-handler = RotatingFileHandler(filename=f'{__name__}.log', mode='a', maxBytes=20 * 1024 * 1024, backupCount=5)
-handler.setFormatter(logging.Formatter('%(asctime)s %(levelname)s %(funcName)s (%(lineno)d) %(message)s'))
-logger.addHandler(handler)
-logger.setLevel(logging.INFO)
 
 # MAIN ENTRY POINT
 if __name__ == '__main__':
@@ -49,13 +36,26 @@ def process_twitter():
         log_payload("REQUEST BODY", payload)
 
         consumer_key = os.environ['TWITTER_CONSUMER_KEY']
+        consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
         access_token_url = f'https://api.twitter.com/oauth/access_token?oauth_consumer_key={consumer_key}&{request.query_string.decode()}'
         res = requests.request('POST', access_token_url)
         access_token_data = split_form_data(res.text)
         mongo_db = config.mongo_db('app', os.environ['MONGO_DB_PWD'], 'twitter')
         user_id = access_token_data['user_id']
         mongo_db['tokens'].replace_one({"user_id": user_id}, access_token_data, upsert=True)
-        user_details = requests.request('GET', f'https://api.twitter.com/2/users/{user_id}')
+
+        # TEST
+        oauth_headers = get_min_twitter_oauth_headers(consumer_key)
+        oauth_token = access_token_data['oauth_token']
+        token_secret = access_token_data['oauth_token_secret']
+        oauth_headers['oauth_token'] = oauth_token
+        hmac_signature = create_twitter_signature('GET', f'https://api.twitter.com/2/users/{user_id}', consumer_secret, token_secret)
+        oauth_headers['oauth_signature'] = percent_encode(hmac_signature)
+        auth_header = create_twitter_auth_header(oauth_headers)
+
+        user_details = requests.request('GET', f'https://api.twitter.com/2/users/{user_id}', headers={
+            "Authorization": auth_header
+        })
 
         return user_details.json(), user_details.status_code
 
@@ -71,15 +71,15 @@ def invoke_twitter_api():
         callback_url = os.environ['TWITTER_CALLBACK_URL']
 
         # INITIAL OAUTH HEADERS
-        oauth_headers = get_minimum_oauth_headers(consumer_key)
+        oauth_headers = get_min_twitter_oauth_headers(consumer_key)
         oauth_headers['oauth_callback'] = callback_url
 
-        hmac_signature = create_signature('POST', 'https://api.twitter.com/oauth/request_token', oauth_headers, consumer_secret)
+        hmac_signature = create_twitter_signature('POST', 'https://api.twitter.com/oauth/request_token', oauth_headers, consumer_secret)
 
         # APPEND THE HMAC SHA1 SIGNATURE TO THE HEADERS
         oauth_headers['oauth_signature'] = percent_encode(hmac_signature)
 
-        auth_header = f'{create_auth_header(oauth_headers)}, oauth_callback="{percent_encode(oauth_headers["oauth_callback"])}"'
+        auth_header = f'{create_twitter_auth_header(oauth_headers)}, oauth_callback="{percent_encode(oauth_headers["oauth_callback"])}"'
         logger.info(auth_header)
 
         res = requests.request('POST', 'https://api.twitter.com/oauth/request_token', headers={
@@ -89,6 +89,7 @@ def invoke_twitter_api():
         form_data = split_form_data(res.text)
         oauth_token = form_data['oauth_token']
         oauth_callback_confirmed = form_data['oauth_callback_confirmed']
+        redirect_url = 'https://www.google.com'
 
         if oauth_callback_confirmed == 'true':
             redirect_url = f'https://api.twitter.com/oauth/authorize?oauth_token={oauth_token}'
@@ -99,72 +100,3 @@ def invoke_twitter_api():
 
     except Exception as e:
         logger.exception(e)
-
-
-# HELPER FUNCTIONS
-def log_payload(payload_id, payload):
-    logger.info(f'{request.method} | {request.full_path} | {payload_id} >>>\n{json.dumps(payload, indent=3)}')
-
-
-def create_response(response_payload):
-    try:
-        response = jsonify(response_payload)
-        response.headers['Access-Control-Allow-Origin'] = os.environ['ALLOWED_ORIGIN']
-        response.headers['Access-Control-Allow-Headers'] = os.environ['ALLOWED_HEADERS']
-        response.headers['Access-Control-Allow-Methods'] = os.environ['ALLOWED_METHODS']
-        response.headers['Access-Control-Max-Age'] = 3600
-        return response
-    except Exception as e:
-        logger.exception(e)
-
-
-def percent_encode(input_str):
-    return urllib.parse.quote(input_str, safe='')
-
-
-def split_form_data(input_str):
-    output_dict = {}
-    for attributes in input_str.split('&'):
-        attribute = attributes.split('=')
-        output_dict[attribute[0]] = attribute[1]
-
-    return output_dict
-
-
-def get_minimum_oauth_headers(consumer_key):
-    oauth_headers = {
-        "oauth_consumer_key": consumer_key,
-        "oauth_nonce": re.sub(r'\W+', '', base64.b64encode(os.urandom(32)).decode()),
-        "oauth_signature_method": "HMAC-SHA1",
-        "oauth_timestamp": int(time.time()),
-        "oauth_version": "1.0"
-    }
-
-    return oauth_headers
-
-
-def create_signature(method, url, params=[], consumer_secret="", token_secret=""):
-    # SORT BY HEADER KEY NAME
-    param_string_arr = []
-    for k, v in sorted(params.items()):
-        param_key = f'{k}'
-        param_val = f'{v}'
-        param_string_arr.append(f'{percent_encode(param_key)}={percent_encode(param_val)}')
-
-    # CREATE A SIGNATURE BASE STRING AND GENERATE HMAC SHA1 SIGNATURE
-    signature_base_str = method + '&' + percent_encode(url) + '&' + percent_encode('&'.join(param_string_arr))
-    signing_key = percent_encode(consumer_secret) + '&' + token_secret
-    hmac_signature = base64.b64encode(
-        hmac.new(bytes(signing_key, 'utf-8'), bytes(signature_base_str, 'utf-8'), sha1).digest()).decode()
-
-    log_payload("OAUTH_SIGNATURE", {
-        "signatureBaseString": signature_base_str,
-        "signingKey": signing_key,
-        "hmac": hmac_signature
-    })
-
-    return hmac_signature
-
-
-def create_auth_header(oauth_headers):
-    return f'OAuth oauth_nonce="{oauth_headers["oauth_nonce"]}", oauth_signature_method="{oauth_headers["oauth_signature_method"]}", oauth_timestamp="{oauth_headers["oauth_timestamp"]}", oauth_consumer_key="{oauth_headers["oauth_consumer_key"]}", oauth_signature="{oauth_headers["oauth_signature"]}", oauth_version="{oauth_headers["oauth_version"]}"'
