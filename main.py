@@ -53,8 +53,9 @@ def process_twitter():
         res = requests.request('POST', access_token_url)
         access_token_data = split_form_data(res.text)
         mongo_db = config.mongo_db('app', os.environ['MONGO_DB_PWD'], 'twitter')
-        mongo_db['tokens'].replace_one({"user_id": access_token_data['user_id']}, access_token_data, upsert=True)
-
+        user_id = access_token_data['user_id']
+        mongo_db['tokens'].replace_one({"user_id": user_id}, access_token_data, upsert=True)
+        requests.request('GET', f'https://api.twitter.com/2/users/{user_id}')
         return "SUCCESS", 200
 
     except Exception as e:
