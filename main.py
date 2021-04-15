@@ -61,13 +61,7 @@ def process_twitter():
             "Authorization": auth_header
         })
 
-        try:
-            response = make_response(user_details.json())
-            response.headers['Content-Type'] = 'application/json'
-            return response, user_details.status_code
-
-        except ValueError as e:
-            return user_details.text, user_details.status_code
+        return "SUCCESS" if user_details.status_code == 200 else "FAILED", user_details.status_code
 
     except Exception as e:
         logger.exception(e)
