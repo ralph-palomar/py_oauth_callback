@@ -49,7 +49,7 @@ def process_twitter():
         oauth_token = access_token_data['oauth_token']
         token_secret = access_token_data['oauth_token_secret']
         oauth_headers['oauth_token'] = oauth_token
-        hmac_signature = create_twitter_signature('GET', f'https://api.twitter.com/2/users/{user_id}', consumer_secret, token_secret)
+        hmac_signature = create_twitter_signature('GET', f'https://api.twitter.com/2/users/{user_id}', consumer_secret=consumer_secret, token_secret=token_secret)
         oauth_headers['oauth_signature'] = percent_encode(hmac_signature)
         auth_header = create_twitter_auth_header(oauth_headers)
 
@@ -74,7 +74,7 @@ def invoke_twitter_api():
         oauth_headers = get_min_twitter_oauth_headers(consumer_key)
         oauth_headers['oauth_callback'] = callback_url
 
-        hmac_signature = create_twitter_signature('POST', 'https://api.twitter.com/oauth/request_token', oauth_headers, consumer_secret)
+        hmac_signature = create_twitter_signature('POST', 'https://api.twitter.com/oauth/request_token', oauth_headers, consumer_secret=consumer_secret)
 
         # APPEND THE HMAC SHA1 SIGNATURE TO THE HEADERS
         oauth_headers['oauth_signature'] = percent_encode(hmac_signature)
