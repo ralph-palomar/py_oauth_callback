@@ -52,7 +52,7 @@ def get_min_twitter_oauth_headers(consumer_key):
     return oauth_headers
 
 
-def create_twitter_signature(method, url, other_params={}, consumer_secret="", token_secret=""):
+def create_twitter_signature(method, url, other_params=None, consumer_secret="", token_secret=""):
     # SORT BY HEADER KEY NAME
     param_string_arr = []
     for k, v in sorted(other_params.items()):
