@@ -52,10 +52,10 @@ def get_min_twitter_oauth_headers(consumer_key):
     return oauth_headers
 
 
-def create_twitter_signature(method, url, params=[], consumer_secret="", token_secret=""):
+def create_twitter_signature(method, url, other_params={}, consumer_secret="", token_secret=""):
     # SORT BY HEADER KEY NAME
     param_string_arr = []
-    for k, v in sorted(params.items()):
+    for k, v in sorted(other_params.items()):
         param_key = f'{k}'
         param_val = f'{v}'
         param_string_arr.append(f'{percent_encode(param_key)}={percent_encode(param_val)}')
