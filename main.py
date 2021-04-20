@@ -40,23 +40,25 @@ def process_twitter():
         access_token_url = f'https://api.twitter.com/oauth/access_token?oauth_consumer_key={consumer_key}&{request.query_string.decode()}'
         res = requests.request('POST', access_token_url)
         access_token_data = split_form_data(res.text)
-        mongo_db = config.mongo_db('app', os.environ['MONGO_DB_PWD'], 'twitter')
-        user_id = access_token_data['user_id']
-        mongo_db['tokens'].replace_one({"user_id": user_id}, access_token_data, upsert=True)
+        mongo_db = config.mongo_db('app', os.environ['MONGO_DB_PWD'],  'app_connections')
+        connection_name = "My Twitter connection"
+        access_token_data['connection_name'] = connection_name
+        access_token_data['connection_type'] = "Twitter"
+        mongo_db['tokens'].replace_one({"connection_name": connection_name}, access_token_data, upsert=True)
 
         # TEST
         oauth_headers = get_min_twitter_oauth_headers(consumer_key)
         oauth_token = access_token_data['oauth_token']
         token_secret = access_token_data['oauth_token_secret']
         oauth_headers['oauth_token'] = oauth_token
-        oauth_headers['user_id'] = user_id
+        oauth_headers['user_id'] = access_token_data['user_id']
         user_details_url = f'https://api.twitter.com/1.1/users/show.json'
         hmac_signature = create_twitter_signature('GET', user_details_url, parameters=oauth_headers, consumer_secret=consumer_secret, token_secret=token_secret)
         oauth_headers['oauth_signature'] = percent_encode(hmac_signature)
         auth_header = f'{create_twitter_auth_header(oauth_headers)}, oauth_token="{percent_encode(oauth_token)}"'
 
         user_details = requests.request('GET', user_details_url, params={
-            "user_id": user_id
+            "user_id": access_token_data['user_id']
         }, headers={
             "Authorization": auth_header
         })
