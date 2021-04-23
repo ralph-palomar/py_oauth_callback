@@ -1,8 +1,8 @@
 from flask import request, make_response
+from utilities import rphelpers
 import os
 import requests
 import config
-import rphelpers
 
 
 def obtain_access_token():

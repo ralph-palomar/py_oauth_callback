@@ -1,9 +1,9 @@
 from flask import Flask
 from waitress import serve
 from paste.translogger import TransLogger
+from utilities import rphelpers
+from applications import twitter
 import config
-import rphelpers
-import twitter
 
 # APP CONFIG
 api = Flask(__name__)
