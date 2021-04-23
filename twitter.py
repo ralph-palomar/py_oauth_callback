@@ -1,0 +1,84 @@
+from main import api, base_path
+from flask import request, make_response
+import os
+import requests
+import config
+import rphelpers
+
+
+@api.route(f'{base_path}/twitter', methods=['GET'])
+def twitter_access_token():
+    try:
+        payload = request.json
+        rphelpers.log_payload("REQUEST BODY", payload)
+
+        consumer_key = os.environ['TWITTER_CONSUMER_KEY']
+        consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
+        access_token_url = f'https://api.twitter.com/oauth/access_token?oauth_consumer_key={consumer_key}&{request.query_string.decode()}'
+        res = requests.request('POST', access_token_url)
+        access_token_data = rphelpers.split_form_data(res.text)
+        mongo_db = config.mongo_db(os.environ['MONGO_DB_USR'], os.environ['MONGO_DB_PWD'],  os.environ['MONGO_DB_'])
+        connection_name = "My Twitter connection"
+        access_token_data['connection_name'] = connection_name
+        access_token_data['connection_type'] = "Twitter"
+        mongo_db['app_connections'].replace_one({"connection_name": connection_name}, access_token_data, upsert=True)
+
+        # TEST
+        oauth_headers = rphelpers.get_min_twitter_oauth_headers(consumer_key)
+        oauth_token = access_token_data['oauth_token']
+        token_secret = access_token_data['oauth_token_secret']
+        oauth_headers['oauth_token'] = oauth_token
+        oauth_headers['user_id'] = access_token_data['user_id']
+        user_details_url = f'https://api.twitter.com/1.1/users/show.json'
+        hmac_signature = rphelpers.create_twitter_signature('GET', user_details_url, parameters=oauth_headers, consumer_secret=consumer_secret, token_secret=token_secret)
+        oauth_headers['oauth_signature'] = rphelpers.percent_encode(hmac_signature)
+        auth_header = f'{rphelpers.create_twitter_auth_header(oauth_headers)}, oauth_token="{rphelpers.percent_encode(oauth_token)}"'
+
+        user_details = requests.request('GET', user_details_url, params={
+            "user_id": access_token_data['user_id']
+        }, headers={
+            "Authorization": auth_header
+        })
+
+        return "SUCCESS" if user_details.status_code == 200 else "FAILED", user_details.status_code
+
+    except Exception as e:
+        config.logger.exception(e)
+
+
+@api.route(f'{base_path}/twitter/authorize', methods=['GET'])
+def twitter_authorization():
+    try:
+        consumer_key = os.environ['TWITTER_CONSUMER_KEY']
+        consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
+        callback_url = os.environ['TWITTER_CALLBACK_URL']
+
+        # INITIAL OAUTH HEADERS
+        oauth_headers = rphelpers.get_min_twitter_oauth_headers(consumer_key)
+        oauth_headers['oauth_callback'] = callback_url
+
+        hmac_signature = rphelpers.create_twitter_signature('POST', 'https://api.twitter.com/oauth/request_token', parameters=oauth_headers, consumer_secret=consumer_secret)
+
+        # APPEND THE HMAC SHA1 SIGNATURE TO THE HEADERS
+        oauth_headers['oauth_signature'] = rphelpers.percent_encode(hmac_signature)
+
+        auth_header = f'{rphelpers.create_twitter_auth_header(oauth_headers)}, oauth_callback="{rphelpers.percent_encode(oauth_headers["oauth_callback"])}"'
+
+        res = requests.request('POST', 'https://api.twitter.com/oauth/request_token', headers={
+            "Authorization": auth_header
+        })
+
+        form_data = rphelpers.split_form_data(res.text)
+        oauth_token = form_data['oauth_token']
+        oauth_callback_confirmed = form_data['oauth_callback_confirmed']
+        redirect_url = 'https://www.google.com'
+
+        if oauth_callback_confirmed == 'true':
+            redirect_url = f'https://api.twitter.com/oauth/authorize?oauth_token={oauth_token}'
+
+        response = make_response()
+        response.headers['Location'] = redirect_url
+        return response, 302
+
+    except Exception as e:
+        config.logger.exception(e)
