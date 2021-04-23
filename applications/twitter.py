@@ -45,7 +45,7 @@ def obtain_access_token():
             user_id=access_token_data['user_id'],
             user_name=access_token_data['screen_name']
         )
-        mongo_db['app_connections'].replace_one({"connection_name": oauth_connection.connection_name}, vars(oauth_connection), upsert=True)
+        mongo_db['app_connections'].replace_one({"connection_name": oauth_connection.connection_name}, sorted(vars(oauth_connection)), upsert=True)
 
         return "SUCCESS" if user_details.status_code == 200 else "FAILED", user_details.status_code
 
