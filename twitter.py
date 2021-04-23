@@ -1,4 +1,3 @@
-from main import api, base_path
 from flask import request, make_response
 import os
 import requests
@@ -6,8 +5,7 @@ import config
 import rphelpers
 
 
-@api.route(f'{base_path}/twitter', methods=['GET'])
-def twitter_access_token():
+def obtain_access_token():
     try:
         payload = request.json
         rphelpers.log_payload("REQUEST BODY", payload)
@@ -46,8 +44,7 @@ def twitter_access_token():
         config.logger.exception(e)
 
 
-@api.route(f'{base_path}/twitter/authorize', methods=['GET'])
-def twitter_authorization():
+def authorize():
     try:
         consumer_key = os.environ['TWITTER_CONSUMER_KEY']
         consumer_secret = os.environ['TWITTER_CONSUMER_SECRET']
