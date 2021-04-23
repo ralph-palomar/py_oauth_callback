@@ -5,7 +5,7 @@ import logging
 
 def mongo_db(user, pwd, db):
     m_client = pymongo.MongoClient(username=user, password=pwd, authSource=db)
-    return m_client
+    return m_client[db]
 
 
 # SETUP ROTATING LOGGERS
