@@ -40,7 +40,7 @@ def process_twitter():
         access_token_url = f'https://api.twitter.com/oauth/access_token?oauth_consumer_key={consumer_key}&{request.query_string.decode()}'
         res = requests.request('POST', access_token_url)
         access_token_data = split_form_data(res.text)
-        mongo_db = config.mongo_db('app', os.environ['MONGO_DB_PWD'],  os.environ['MONGO_DB_'])
+        mongo_db = config.mongo_db(os.environ['MONGO_DB_USR'], os.environ['MONGO_DB_PWD'],  os.environ['MONGO_DB_'])
         connection_name = "My Twitter connection"
         access_token_data['connection_name'] = connection_name
         access_token_data['connection_type'] = "Twitter"
