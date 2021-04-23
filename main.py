@@ -32,9 +32,9 @@ def pre_flight():
 # API DEFINITIONS
 @api.route(f'{base_path}/twitter', methods=['GET'])
 def twitter_obtain_access_token():
-    twitter.obtain_access_token()
+    return twitter.obtain_access_token()
 
 
 @api.route(f'{base_path}/twitter/authorize', methods=['GET'])
 def twitter_authorize():
-    twitter.authorize()
+    return twitter.authorize()
