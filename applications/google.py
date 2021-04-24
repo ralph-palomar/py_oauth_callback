@@ -28,6 +28,8 @@ def obtain_access_token():
         "code": authorization_code,
         "grant_type": "authorization_code",
         "redirect_uri": os.environ['GOOGLE_CALLBACK_URL']
+    }, headers={
+        "Content-Type": "application/x-www-form-urlencoded"
     })
 
     config.logger.info(res.text)
