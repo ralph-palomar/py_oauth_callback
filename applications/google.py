@@ -30,4 +30,6 @@ def obtain_access_token():
         "redirect_uri": os.environ['GOOGLE_CALLBACK_URL']
     })
 
-    return res.text, res.status_code
+    config.logger.info(res.text)
+
+    return "SUCCESS", res.status_code
