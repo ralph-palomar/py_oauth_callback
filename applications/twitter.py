@@ -34,7 +34,6 @@ def obtain_access_token():
         })
 
         # SAVE CREDENTIALS
-        mongo_db = config.mongo_db(os.environ['MONGO_DB_USR'], os.environ['MONGO_DB_PWD'],  os.environ['MONGO_DB_'])
         oauth_connection = app_connection.OAuthConnection(
             connection_name="My Twitter connection",
             connection_type=app_connection.ConnectionType.TWITTER,
@@ -45,7 +44,7 @@ def obtain_access_token():
             user_id=access_token_data['user_id'],
             user_name=access_token_data['screen_name']
         )
-        mongo_db['app_connections'].replace_one({"connection_name": oauth_connection.connection_name}, vars(oauth_connection), upsert=True)
+        rphelpers.save_oauth_credentials(oauth_connection)
 
         return "SUCCESS" if user_details.status_code == 200 else "FAILED", user_details.status_code
 

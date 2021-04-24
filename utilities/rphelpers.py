@@ -1,6 +1,7 @@
 from hashlib import sha1
-from config import logger
+from config import logger, mongo_db
 from flask import request, jsonify
+from definitions import app_connection
 import os
 import urllib
 import base64
@@ -77,3 +78,8 @@ def create_twitter_signature(method, url, parameters={}, consumer_secret="", tok
 
 def create_twitter_auth_header(oauth_headers):
     return f'OAuth oauth_nonce="{oauth_headers["oauth_nonce"]}", oauth_signature_method="{oauth_headers["oauth_signature_method"]}", oauth_timestamp="{oauth_headers["oauth_timestamp"]}", oauth_consumer_key="{oauth_headers["oauth_consumer_key"]}", oauth_signature="{oauth_headers["oauth_signature"]}", oauth_version="{oauth_headers["oauth_version"]}"'
+
+
+def save_oauth_credentials(oauth_connection: app_connection.OAuthConnection):
+    mongo_db(os.environ['MONGO_DB_USR'], os.environ['MONGO_DB_PWD'], os.environ['MONGO_DB_'])
+    mongo_db['app_connections'].replace_one({"connection_name": oauth_connection.connection_name}, vars(oauth_connection), upsert=True)

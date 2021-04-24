@@ -1,4 +1,6 @@
 from flask import make_response, request
+from utilities import rphelpers
+from definitions import app_connection
 import config
 import os
 import requests
@@ -32,6 +34,17 @@ def obtain_access_token():
         "Content-Type": "application/x-www-form-urlencoded"
     })
 
-    config.logger.info(res.text)
+    # SAVE CREDENTIALS
+    if res.status_code == 200:
+        json_res = res.json()
+        oauth_connection = app_connection.OAuthConnection(
+            connection_name="My Google connection",
+            connection_type=app_connection.ConnectionType.GOOGLE,
+            client_id=os.environ['GOOGLE_CLIENT_ID'],
+            client_secret=os.environ['GOOGLE_CLIENT_SECRET'],
+            access_token=json_res['access_token'],
+            refresh_token=json_res['refresh_token']
+        )
+        rphelpers.save_oauth_credentials(oauth_connection)
 
-    return "SUCCESS", res.status_code
+    return "SUCCESS" if res.status_code == 200 else "FAILED", res.status_code
