@@ -11,7 +11,7 @@ def authorize():
             "response_type": "code",
             "scope": "https://www.googleapis.com/auth/spreadsheets"
         })
-        config.logger.info(res.text)
+        return res
 
     except Exception as e:
         config.logger.exception(e)
