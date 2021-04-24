@@ -80,6 +80,7 @@ def create_twitter_auth_header(oauth_headers):
     return f'OAuth oauth_nonce="{oauth_headers["oauth_nonce"]}", oauth_signature_method="{oauth_headers["oauth_signature_method"]}", oauth_timestamp="{oauth_headers["oauth_timestamp"]}", oauth_consumer_key="{oauth_headers["oauth_consumer_key"]}", oauth_signature="{oauth_headers["oauth_signature"]}", oauth_version="{oauth_headers["oauth_version"]}"'
 
 
-def save_oauth_credentials(connection_name, oauth_connection_details: app_connection.OAuthConnection):
+def save_oauth_credentials(oauth_connection_details: app_connection.OAuthConnection):
     mongo_db(os.environ['MONGO_DB_USR'], os.environ['MONGO_DB_PWD'], os.environ['MONGO_DB_'])
+    connection_name = oauth_connection_details.connection_name
     mongo_db['app_connections'].replace_one({"connection_name": connection_name}, vars(oauth_connection_details), upsert=True)
