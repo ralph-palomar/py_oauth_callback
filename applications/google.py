@@ -14,7 +14,8 @@ def authorize():
                                        f'redirect_uri={os.environ["GOOGLE_CALLBACK_URL"]}&' \
                                        f'response_type=code&' \
                                        f'scope=https://www.googleapis.com/auth/spreadsheets&' \
-                                       f'access_type=offline'
+                                       f'access_type=offline&' \
+                                       f'prompt=consent'
 
         return response, 302
 
