@@ -21,7 +21,7 @@ def authorize():
 
 
 def obtain_access_token():
-    authorization_code = request.get("code")
+    authorization_code = request.args.get("code")
     res = requests.request('POST', 'https://oauth2.googleapis.com/token', params={
         "client_id": os.environ['GOOGLE_CLIENT_ID'],
         "client_secret": os.environ['GOOGLE_CLIENT_SECRET'],
