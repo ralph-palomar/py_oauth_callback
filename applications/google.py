@@ -4,6 +4,7 @@ from definitions import app_connection
 import config
 import os
 import requests
+import json
 
 
 def authorize():
@@ -36,7 +37,7 @@ def obtain_access_token():
 
     # SAVE CREDENTIALS
     if res.status_code == 200:
-        json_res = res.json()
+        json_res = json.loads(res.json)
         oauth_connection = app_connection.OAuthConnection(
             connection_name="My Google connection",
             connection_type=app_connection.ConnectionType.GOOGLE,
