@@ -40,7 +40,7 @@ def obtain_access_token():
         if res.status_code == 200:
             config.logger.info(res.text)
             data = res.json()
-            oauth_connection = app_connection.OAuthConnection(
+            oauth_data = app_connection.OAuthConnection(
                 connection_name="My Google connection",
                 connection_type=app_connection.ConnectionType.GOOGLE,
                 client_id=os.environ['GOOGLE_CLIENT_ID'],
@@ -48,7 +48,7 @@ def obtain_access_token():
                 access_token=data['access_token'],
                 refresh_token=data.get('refresh_token')
             )
-            rphelpers.save_oauth_credentials(oauth_connection)
+            rphelpers.save_oauth_credentials(oauth_data)
 
         return "SUCCESS" if res.status_code == 200 else "FAILED", res.status_code
 
