@@ -46,7 +46,7 @@ def obtain_access_token():
                 client_id=os.environ['GOOGLE_CLIENT_ID'],
                 client_secret=os.environ['GOOGLE_CLIENT_SECRET'],
                 access_token=data['access_token'],
-                refresh_token=data.get('refresh_token')
+                refresh_token=data.get('refresh_token', "")
             )
             rphelpers.save_oauth_credentials(oauth_connection)
 
