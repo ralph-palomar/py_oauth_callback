@@ -20,9 +20,6 @@ class OAuthConnection:
         self.client_secret = client_secret
         self.refresh_token = refresh_token
 
-    def __getitem__(self, item):
-        return item
-
 
 class ConnectionType:
     TWITTER = "Twitter"
