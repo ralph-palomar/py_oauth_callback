@@ -1,6 +1,7 @@
-from flask import make_response
+from flask import make_response, request
 import config
 import os
+import requests
 
 
 def authorize():
@@ -20,4 +21,13 @@ def authorize():
 
 
 def obtain_access_token():
-    return "SUCCESS", 200
+    authorization_code = request.get("code")
+    res = requests.request('POST', 'https://oauth2.googleapis.com/token', params={
+        "client_id": os.environ['GOOGLE_CLIENT_ID'],
+        "client_secret": os.environ['GOOGLE_CLIENT_SECRET'],
+        "code": authorization_code,
+        "grant_type": "authorization_code",
+        "redirect_uri": os.environ['GOOGLE_CALLBACK_URL']
+    })
+
+    return res.text, res.status_code
