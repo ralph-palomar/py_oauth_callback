@@ -15,7 +15,7 @@ def authorize():
                                        f'response_type=code&' \
                                        f'scope=https://www.googleapis.com/auth/spreadsheets&' \
                                        f'access_type=offline&' \
-                                       f'prompt=consent'
+                                       f'prompt=consent&approval_prompt=force'
 
         return response, 302
 
