@@ -6,10 +6,10 @@ class OAuthConnection:
                  client_id,
                  client_secret,
                  access_token,
-                 access_token_secret,
-                 user_id,
-                 user_name,
-                 refresh_token):
+                 access_token_secret="",
+                 user_id="",
+                 user_name="",
+                 refresh_token=""):
         self.connection_name = connection_name
         self.connection_type = connection_type
         self.user_id = user_id
