@@ -24,28 +24,32 @@ def authorize():
 
 
 def obtain_access_token():
-    authorization_code = request.args.get("code")
-    res = requests.request('POST', 'https://oauth2.googleapis.com/token', params={
-        "client_id": os.environ['GOOGLE_CLIENT_ID'],
-        "client_secret": os.environ['GOOGLE_CLIENT_SECRET'],
-        "code": authorization_code,
-        "grant_type": "authorization_code",
-        "redirect_uri": os.environ['GOOGLE_CALLBACK_URL']
-    }, headers={
-        "Content-Type": "application/x-www-form-urlencoded"
-    })
+    try:
+        authorization_code = request.args.get("code")
+        res = requests.request('POST', 'https://oauth2.googleapis.com/token', params={
+            "client_id": os.environ['GOOGLE_CLIENT_ID'],
+            "client_secret": os.environ['GOOGLE_CLIENT_SECRET'],
+            "code": authorization_code,
+            "grant_type": "authorization_code",
+            "redirect_uri": os.environ['GOOGLE_CALLBACK_URL']
+        }, headers={
+            "Content-Type": "application/x-www-form-urlencoded"
+        })
 
-    # SAVE CREDENTIALS
-    if res.status_code == 200:
-        json_res = json.loads(res.json)
-        oauth_connection = app_connection.OAuthConnection(
-            connection_name="My Google connection",
-            connection_type=app_connection.ConnectionType.GOOGLE,
-            client_id=os.environ['GOOGLE_CLIENT_ID'],
-            client_secret=os.environ['GOOGLE_CLIENT_SECRET'],
-            access_token=json_res['access_token'],
-            refresh_token=json_res['refresh_token']
-        )
-        rphelpers.save_oauth_credentials(oauth_connection)
+        # SAVE CREDENTIALS
+        if res.status_code == 200:
+            json_res = json.loads(res.json())
+            oauth_connection = app_connection.OAuthConnection(
+                connection_name="My Google connection",
+                connection_type=app_connection.ConnectionType.GOOGLE,
+                client_id=os.environ['GOOGLE_CLIENT_ID'],
+                client_secret=os.environ['GOOGLE_CLIENT_SECRET'],
+                access_token=json_res['access_token'],
+                refresh_token=json_res['refresh_token']
+            )
+            rphelpers.save_oauth_credentials(oauth_connection)
 
-    return "SUCCESS" if res.status_code == 200 else "FAILED", res.status_code
+        return "SUCCESS" if res.status_code == 200 else "FAILED", res.status_code
+
+    except Exception as e:
+        config.logger.exception(e)
