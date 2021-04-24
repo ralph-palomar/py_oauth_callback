@@ -83,11 +83,9 @@ def create_twitter_auth_header(oauth_headers):
 def save_oauth_credentials(oauth_connection_details: app_connection.OAuthConnection):
     mongodb = mongo_db(os.environ['MONGO_DB_USR'], os.environ['MONGO_DB_PWD'], os.environ['MONGO_DB_'])
     connection_name = oauth_connection_details.connection_name
-    connection_details = {
-        "$set": vars(oauth_connection_details)
-    }
+    connection_details = vars(oauth_connection_details)
 
     if connection_details['refresh_token'] == "":
         connection_details.pop('refresh_token')
 
-    mongodb['app_connections'].update_one({"connection_name": connection_name}, connection_details, upsert=True)
+    mongodb['app_connections'].update_one({"connection_name": connection_name}, {"$set": connection_details}, upsert=True)
