@@ -44,7 +44,7 @@ def obtain_access_token():
             user_id=access_token_data['user_id'],
             user_name=access_token_data['screen_name']
         )
-        rphelpers.save_oauth_credentials(oauth_connection)
+        rphelpers.save_oauth_credentials("My Twitter connection", oauth_connection)
 
         return "SUCCESS" if user_details.status_code == 200 else "FAILED", user_details.status_code
 

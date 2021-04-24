@@ -48,7 +48,7 @@ def obtain_access_token():
                 access_token=data['access_token'],
                 refresh_token=data.get('refresh_token')
             )
-            rphelpers.save_oauth_credentials(oauth_data)
+            rphelpers.save_oauth_credentials("My Google connection", oauth_data)
 
         return "SUCCESS" if res.status_code == 200 else "FAILED", res.status_code
 
