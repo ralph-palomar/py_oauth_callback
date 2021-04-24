@@ -43,3 +43,8 @@ def twitter_authorize():
 @api.route(f'{base_path}/google/authorize', methods=['GET'])
 def google_authorize():
     return google.authorize()
+
+
+@api.route(f'{base_path}/google', methods=['GET'])
+def google_obtain_access_token():
+    return google.obtain_access_token()

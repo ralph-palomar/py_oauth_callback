@@ -17,3 +17,7 @@ def authorize():
 
     except Exception as e:
         config.logger.exception(e)
+
+
+def obtain_access_token():
+    return "SUCCESS", 200
