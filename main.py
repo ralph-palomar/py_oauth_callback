@@ -2,7 +2,7 @@ from flask import Flask
 from waitress import serve
 from paste.translogger import TransLogger
 from utilities import rphelpers
-from applications import twitter
+from applications import twitter, google
 import config
 
 # APP CONFIG
@@ -38,3 +38,8 @@ def twitter_obtain_access_token():
 @api.route(f'{base_path}/twitter/authorize', methods=['GET'])
 def twitter_authorize():
     return twitter.authorize()
+
+
+@api.route(f'{base_path}/google/authorize', methods=['GET'])
+def google_authorize():
+    return google.authorize()
