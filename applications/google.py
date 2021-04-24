@@ -37,14 +37,15 @@ def obtain_access_token():
 
         # SAVE CREDENTIALS
         if res.status_code == 200:
-            json_res = res.json()
+            config.logger.info(res.text)
+            data = res.json()
             oauth_connection = app_connection.OAuthConnection(
                 connection_name="My Google connection",
                 connection_type=app_connection.ConnectionType.GOOGLE,
                 client_id=os.environ['GOOGLE_CLIENT_ID'],
                 client_secret=os.environ['GOOGLE_CLIENT_SECRET'],
-                access_token=json_res['access_token'],
-                refresh_token=json_res['refresh_token']
+                access_token=data['access_token'],
+                refresh_token=data['refresh_token']
             )
             rphelpers.save_oauth_credentials(oauth_connection)
 
