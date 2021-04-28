@@ -1,7 +1,8 @@
 from functools import wraps
 from hashlib import sha1
-from config import logger
+from config import logger, mongo_db
 from flask import request, jsonify
+from definitions import app_connection
 import os
 import urllib
 import base64
@@ -78,6 +79,17 @@ def create_twitter_signature(method, url, parameters={}, consumer_secret="", tok
 
 def create_twitter_auth_header(oauth_headers):
     return f'OAuth oauth_nonce="{oauth_headers["oauth_nonce"]}", oauth_signature_method="{oauth_headers["oauth_signature_method"]}", oauth_timestamp="{oauth_headers["oauth_timestamp"]}", oauth_consumer_key="{oauth_headers["oauth_consumer_key"]}", oauth_signature="{oauth_headers["oauth_signature"]}", oauth_version="{oauth_headers["oauth_version"]}"'
+
+
+def save_oauth_credentials(oauth_connection_details: app_connection.OAuthConnection):
+    mongodb = mongo_db(os.environ['MONGO_DB_USR'], os.environ['MONGO_DB_PWD'], os.environ['MONGO_DB_'])
+    connection_name = oauth_connection_details.connection_name
+    connection_details = vars(oauth_connection_details)
+
+    if connection_details['refresh_token'] == "":
+        connection_details.pop('refresh_token')
+
+    mongodb['app_connections'].update_one({"connection_name": connection_name}, {"$set": connection_details}, upsert=True)
 
 
 # BASIC AUTHENTICATION WRAPPER
