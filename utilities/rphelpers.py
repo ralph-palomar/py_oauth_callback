@@ -104,4 +104,4 @@ def is_authenticated(username, password):
 
 
 def unauthorized():
-    return create_response({}), 401
+    return "NOT ALLOWED", 401
