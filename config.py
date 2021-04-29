@@ -1,9 +1,10 @@
 from logging.handlers import RotatingFileHandler
 import pymongo
 import logging
+import os
 
 
-def mongo_db(user, pwd, db):
+def mongo_db_local(user=os.environ['MONGO_DB_USR'], pwd=os.environ['MONGO_DB_PWD'], db=os.environ['MONGO_DB_']):
     m_client = pymongo.MongoClient(username=user, password=pwd, authSource=db)
     return m_client[db]
 

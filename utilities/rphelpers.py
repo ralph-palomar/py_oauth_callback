@@ -1,6 +1,6 @@
 from functools import wraps
 from hashlib import sha1
-from config import logger, mongo_db
+from config import logger, mongo_db_local
 from flask import request, jsonify
 from definitions import app_connection
 import os
@@ -82,7 +82,7 @@ def create_twitter_auth_header(oauth_headers):
 
 
 def save_oauth_credentials(oauth_connection_details: app_connection.OAuthConnection):
-    mongodb = mongo_db(os.environ['MONGO_DB_USR'], os.environ['MONGO_DB_PWD'], os.environ['MONGO_DB_'])
+    mongodb = mongo_db_local()
     connection_name = oauth_connection_details.connection_name
     connection_details = vars(oauth_connection_details)
 
