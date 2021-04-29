@@ -1,5 +1,5 @@
 from config import mongo_db_local
-from rphelpers import create_response
+from utilities import rphelpers
 import config
 
 
@@ -13,7 +13,7 @@ def all_app_connections():
                 "connection_type": item['connection_type']
             })
 
-        return create_response(result), 200
+        return rphelpers.create_response(result), 200
 
     except Exception as e:
         config.logger(e)
