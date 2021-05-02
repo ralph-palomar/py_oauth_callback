@@ -3,6 +3,7 @@ from hashlib import sha1
 from config import logger, mongo_db_local
 from flask import request, jsonify
 from definitions import app_connection
+from datetime import datetime, timedelta
 import os
 import urllib
 import base64
@@ -10,7 +11,7 @@ import re
 import time
 import json
 import hmac
-
+import jwt
 
 # MY OWN HELPER FUNCTIONS
 def log_payload(payload_id, payload):
@@ -117,3 +118,17 @@ def is_authenticated(username, password):
 
 def unauthorized():
     return "FORBIDDEN", 401
+
+
+def generate_jwt():
+    try:
+        token = jwt.encode({
+            "u": os.environ['APP_USERNAME'],
+            "p": os.environ['APP_PASSWORD'],
+            "exp": datetime.utcnow() + timedelta(seconds=5)
+        }, key=os.environ['MASTER_KEY'], algorithm='HS256')
+
+        return create_response({"token": token}), 200
+
+    except Exception as e:
+        logger.exception(e)
