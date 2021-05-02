@@ -1,4 +1,3 @@
-
 class OAuthConnection:
     def __init__(self,
                  connection_name,

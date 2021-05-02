@@ -3,7 +3,10 @@ from waitress import serve
 from paste.translogger import TransLogger
 from utilities import rphelpers, app_connection
 from applications import twitter, google
+from datetime import datetime, timedelta
 import config
+import jwt
+import os
 
 # APP CONFIG
 api = Flask(__name__)
@@ -55,3 +58,18 @@ def google_obtain_access_token():
 @rphelpers.requires_basic_authentication
 def app_connections():
     return app_connection.all_app_connections()
+
+
+@api.route(f'{base_path}/apps', methods=['GET'])
+def acquire_token():
+    try:
+        token = jwt.encode({
+            "u": os.environ['APP_USERNAME'],
+            "p": os.environ['APP_PASSWORD'],
+            "exp": datetime.utcnow() + timedelta(seconds=5)
+        }, key=os.environ['MASTER_KEY'], algorithm='HS256')
+
+        return rphelpers.create_response({"token": token}), 200
+
+    except Exception as e:
+        config.logger(e)

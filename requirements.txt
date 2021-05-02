@@ -3,3 +3,4 @@ waitress~=2.0.0
 Paste~=3.5.0
 requests~=2.25.1
 pymongo~=3.11.3
+PyJWT~=2.1.0
