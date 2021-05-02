@@ -99,9 +99,14 @@ def requires_basic_authentication(f):
     def wrapper(*args, **kwargs):
         try:
             auth = request.authorization
-            if not auth or not is_authenticated(auth.username, auth.password):
-                return unauthorized()
+            if auth.username == "X-API-KEY":
+                claims = jwt.decode(auth.password, key=os.environ['MASTER_KEY'], issuer=os.environ["DOMAIN"], algorithms=['HS256'])
+            else:
+                if not auth or not is_authenticated(auth.username, auth.password):
+                    return unauthorized()
+
             return f(*args, **kwargs)
+
         except Exception as e:
             logger.exception(e)
 
