@@ -60,7 +60,7 @@ def app_connections():
     return app_connection.all_app_connections()
 
 
-@api.route(f'{base_path}/apps', methods=['GET'])
+@api.route(f'{base_path}/token', methods=['GET'])
 def acquire_token():
     try:
         token = jwt.encode({
