@@ -109,6 +109,7 @@ def requires_basic_authentication(f):
 
         except Exception as e:
             logger.exception(e)
+            return unauthorized()
 
     return wrapper
 
