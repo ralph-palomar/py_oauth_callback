@@ -130,12 +130,11 @@ def unauthorized():
 
 def generate_jwt():
     try:
-        logger.info(request.host)
         token = jwt.encode({
             "u": os.environ['APP_USERNAME'],
             "p": os.environ['APP_PASSWORD'],
             "exp": datetime.utcnow() + timedelta(seconds=3),
-            "iss": request.host
+            "iss": os.environ['DOMAIN']
         }, key=os.environ['MASTER_KEY'], algorithm='HS256')
 
         return create_response({"token": token}), 200
