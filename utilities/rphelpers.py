@@ -101,6 +101,8 @@ def requires_basic_authentication(f):
             auth = request.authorization
             if auth.username == "X-API-KEY":
                 claims = jwt.decode(auth.password, key=os.environ['MASTER_KEY'], issuer=os.environ["DOMAIN"], algorithms=['HS256'])
+                if not is_authenticated(claims['u'], claims['p']):
+                    return unauthorized()
             else:
                 if not auth or not is_authenticated(auth.username, auth.password):
                     return unauthorized()
@@ -131,7 +133,7 @@ def generate_jwt():
         token = jwt.encode({
             "u": os.environ['APP_USERNAME'],
             "p": os.environ['APP_PASSWORD'],
-            "exp": datetime.utcnow() + timedelta(seconds=60),
+            "exp": datetime.utcnow() + timedelta(seconds=5),
             "iss": os.environ['DOMAIN']
         }, key=os.environ['MASTER_KEY'], algorithm='HS256')
 
