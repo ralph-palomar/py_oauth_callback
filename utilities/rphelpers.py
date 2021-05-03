@@ -134,7 +134,7 @@ def generate_jwt():
             "u": os.environ['APP_USERNAME'],
             "p": os.environ['APP_PASSWORD'],
             "exp": datetime.utcnow() + timedelta(seconds=3),
-            "iss": request.args.get("domain")
+            "iss": request.host
         }, key=os.environ['MASTER_KEY'], algorithm='HS256')
 
         return create_response({"token": token}), 200
