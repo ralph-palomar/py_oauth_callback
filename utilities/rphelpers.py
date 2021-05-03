@@ -101,7 +101,7 @@ def requires_basic_authentication(f):
             auth = request.authorization
             if auth.username == "X-API-KEY":
                 logger.info(request.host)
-                claims = jwt.decode(auth.password, key=os.environ['MASTER_KEY'], issuer=request.host, algorithms=['HS256'])
+                claims = jwt.decode(auth.password, key=os.environ['MASTER_KEY'], issuer=os.environ['DOMAIN'], algorithms=['HS256'])
                 if not is_authenticated(claims['u'], claims['p']):
                     return unauthorized()
             else:
