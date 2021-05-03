@@ -130,6 +130,7 @@ def unauthorized():
 
 def generate_jwt():
     try:
+        logger.info(request.host)
         token = jwt.encode({
             "u": os.environ['APP_USERNAME'],
             "p": os.environ['APP_PASSWORD'],
