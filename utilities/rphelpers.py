@@ -133,7 +133,7 @@ def generate_jwt():
         token = jwt.encode({
             "u": os.environ['APP_USERNAME'],
             "p": os.environ['APP_PASSWORD'],
-            "exp": datetime.utcnow() + timedelta(seconds=5),
+            "exp": datetime.utcnow() + timedelta(seconds=3),
             "iss": os.environ['DOMAIN']
         }, key=os.environ['MASTER_KEY'], algorithm='HS256')
 
