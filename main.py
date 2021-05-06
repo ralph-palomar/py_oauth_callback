@@ -47,6 +47,7 @@ def google_authorize():
 
 
 @api.route(f'{base_path}/google', methods=['GET'])
+@rphelpers.requires_basic_authentication
 def google_obtain_access_token():
     return google.obtain_access_token()
 
