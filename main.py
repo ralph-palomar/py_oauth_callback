@@ -58,6 +58,5 @@ def app_connections():
 
 
 @api.route(f'{base_path}/token', methods=['GET'])
-@rphelpers.requires_basic_authentication
 def acquire_token():
     return rphelpers.generate_jwt()
